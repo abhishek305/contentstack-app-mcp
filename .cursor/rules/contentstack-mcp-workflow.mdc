@@ -1,0 +1,38 @@
+---
+description: Contentstack Marketplace App Development — MCP Workflow
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Contentstack App Development
+
+When the user asks to build, create, develop, or generate a Contentstack app,
+marketplace app, UI extension, custom field, sidebar widget, dashboard widget,
+full page app, or any Contentstack location-based component:
+
+## ALWAYS use the contentstack-apps MCP tools in this order:
+
+1. Read `cs://locations` — understand all UI location types before choosing one
+2. Read `cs://security` — determine correct security tier for external APIs
+3. Read `cs://patterns` — understand Venus components before writing any UI code
+4. Draft a structured spec from the user's intent
+5. Call `cs_preflight({ spec })` — validate the spec
+6. Call `cs_plan({ spec })` — get confirmation_prompt, show it to the user, WAIT for approval
+7. After approval: call `cs_manifest({ spec })` — generate manifest.json, write to disk
+8. Call `cs_scaffold({ spec, category: "infrastructure" })` — write returned files to disk
+9. Call `cs_scaffold({ spec, category: "routing" })` — write returned files to disk
+10. Call `cs_scaffold({ spec, category: "locations" })` — write returned files to disk
+11. Run `npm install && npm run dev`
+
+## For migrating an existing app:
+1. Call `cs_analyze({ repo_path })` — audit the repo
+2. Show findings to user grouped by severity
+3. Call `cs_migrate({ analysis })` — get ordered migration steps
+4. Execute steps one at a time, verify build passes after each
+
+## Rules:
+- NEVER write Contentstack app code from scratch without going through cs_preflight first
+- NEVER use raw fetch() or axios() — always use callProxyApi() from useApi() hook
+- NEVER use Venus components without the @ts-ignore import comment
+- NEVER use cbModal inside a Custom Field location
+- ALWAYS use Venus components (cs://patterns) for all standard UI elements

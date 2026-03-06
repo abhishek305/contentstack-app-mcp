@@ -1,0 +1,211 @@
+{
+  "_description": "JSON Schema for Contentstack App Specifications. Used by cs_preflight for validation.",
+  "_version": "1.0",
+  "type": "object",
+  "required": ["app_name", "target_type", "ui_locations"],
+  "additionalProperties": false,
+  "properties": {
+    "app_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable app name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short app description"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": ["stack", "organization"],
+      "description": "Whether the app targets a stack or an organization"
+    },
+    "ui_locations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "cs.cm.stack.custom_field",
+              "cs.cm.stack.sidebar",
+              "cs.cm.stack.dashboard",
+              "cs.cm.stack.asset_sidebar",
+              "cs.cm.stack.full_page",
+              "cs.cm.stack.field_modifier",
+              "cs.cm.stack.content_type_sidebar",
+              "cs.cm.stack.rte",
+              "cs.cm.stack.config",
+              "cs.cm.organization.full_page"
+            ]
+          },
+          "data_type": {
+            "type": "string",
+            "enum": ["text", "json", "number", "boolean", "date"],
+            "description": "Required when type=cs.cm.stack.custom_field"
+          },
+          "allowed_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["text", "json", "number", "file", "reference"]
+            },
+            "minItems": 1,
+            "description": "Required when type=cs.cm.stack.field_modifier"
+          },
+          "default_width": {
+            "type": "string",
+            "enum": ["half", "full"],
+            "description": "Optional for cs.cm.stack.dashboard"
+          },
+          "width": {
+            "type": "number",
+            "description": "Optional width in pixels for cs.cm.stack.asset_sidebar"
+          },
+          "label": {
+            "type": "string",
+            "description": "Display name for this location in the UI"
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "const": "cs.cm.stack.custom_field" } } },
+            "then": { "required": ["data_type"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "cs.cm.stack.field_modifier" } } },
+            "then": { "required": ["allowed_types"] }
+          }
+        ]
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional feature flags or feature names"
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "OAuth permission scopes. See cs://security for full list."
+    },
+    "variables": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Tier 3a: App-level secrets (same for all installations). Referenced as {{var.NAME}} in headers."
+    },
+    "mappings": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Tier 3b: Per-installation secrets via serverConfiguration. Referenced as {{map.NAME}} in headers. Requires cs.cm.stack.config location."
+    },
+    "rewrites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "destination"],
+        "properties": {
+          "source": { "type": "string", "description": "Relative path starting with /" },
+          "destination": { "type": "string", "description": "Absolute URL (must start with https://)" }
+        }
+      },
+      "description": "URL proxy rules for external API calls"
+    },
+    "webhooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target_url"],
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "target_url": { "type": "string", "pattern": "^https://" },
+          "channels": { "type": "array", "items": { "type": "string" } },
+          "custom_headers": { "type": "object" },
+          "branch_scope": { "type": "string" }
+        }
+      },
+      "description": "Webhook configurations. target_url must start with https://"
+    },
+    "oauth": {
+      "type": "object",
+      "properties": {
+        "redirect_uri": { "type": "string" },
+        "user_token_config": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "scopes": { "type": "array", "items": { "type": "string" } },
+            "allow_pkce": { "type": "boolean" }
+          }
+        },
+        "app_token_config": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "scopes": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  },
+  "_cross_field_rules": [
+    {
+      "rule": "mappings_requires_config",
+      "description": "If mappings is present and non-empty, cs.cm.stack.config must be in ui_locations",
+      "error": "advanced_settings.mappings requires a cs.cm.stack.config location for user key input"
+    },
+    {
+      "rule": "webhook_target_https",
+      "description": "webhook.target_url must start with https://",
+      "error": "webhook.target_url must use HTTPS"
+    },
+    {
+      "rule": "custom_field_requires_data_type",
+      "description": "cs.cm.stack.custom_field requires data_type",
+      "error": "custom_field location requires data_type"
+    },
+    {
+      "rule": "field_modifier_requires_allowed_types",
+      "description": "cs.cm.stack.field_modifier requires allowed_types (non-empty array)",
+      "error": "field_modifier location requires allowed_types with at least one value"
+    }
+  ],
+  "_security_tier_inference": {
+    "tier_1": "No variables, no mappings, no rewrites, no oauth",
+    "tier_2": "Has permissions array (non-empty)",
+    "tier_3a": "Has variables and/or rewrites (but no mappings)",
+    "tier_3b": "Has mappings (implies per-installation keys, requires cs.cm.stack.config)"
+  },
+  "_examples": {
+    "simple_color_picker": {
+      "app_name": "Color Picker",
+      "target_type": "stack",
+      "ui_locations": [{ "type": "cs.cm.stack.custom_field", "data_type": "text", "label": "Color Picker" }]
+    },
+    "youtube_video_picker": {
+      "app_name": "YouTube Video Picker",
+      "description": "Browse a YouTube channel and save video URL to an entry field",
+      "target_type": "stack",
+      "ui_locations": [
+        { "type": "cs.cm.stack.sidebar", "label": "YouTube Video Picker" },
+        { "type": "cs.cm.stack.config" }
+      ],
+      "permissions": ["cs.cm.stack.entry.read", "cs.cm.stack.entry.update"],
+      "variables": { "YOUTUBE_API_KEY": "" },
+      "mappings": { "CHANNEL_ID": "installation.channel_id" },
+      "rewrites": [{ "source": "/proxy/youtube/*rest", "destination": "https://www.googleapis.com/youtube/v3/*rest" }]
+    },
+    "ai_content_assistant": {
+      "app_name": "AI Content Assistant",
+      "target_type": "stack",
+      "ui_locations": [
+        { "type": "cs.cm.stack.field_modifier", "allowed_types": ["text", "json"], "label": "AI Assistant" },
+        { "type": "cs.cm.stack.sidebar", "label": "AI Suggestions" }
+      ],
+      "variables": { "OPENAI_API_KEY": "" },
+      "rewrites": [{ "source": "/openai/*path", "destination": "https://api.openai.com/*path" }]
+    }
+  }
+}

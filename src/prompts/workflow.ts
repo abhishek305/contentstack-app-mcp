@@ -1,6 +1,6 @@
 export const workflowPrompt = {
   name: "cs_workflow",
-  description: "Orchestrates the full app creation workflow. Guides through spec drafting → preflight → plan → manifest → scaffold in the correct sequence.",
+  description: "Orchestrates the full app creation workflow. Guides through spec drafting → preflight → plan → manifest → scaffold → venus resolution → verify → build in the correct sequence.",
   arguments: [
     {
       name: "intent",
@@ -69,17 +69,38 @@ After user approval, call cs_manifest({ spec }) using the same spec object.
 Write the returned manifest object as manifest.json to disk.
 
 ## Step 6 — Scaffold (3 calls)
-Call cs_scaffold({ spec, category: "infrastructure" })
-Write all returned files to disk.
+For each category (infrastructure, routing, locations):
+  1. Call cs_scaffold({ spec, category })
+  2. The response contains a "directories" array — create ALL directories first (mkdir -p)
+  3. Then write ALL files from the "files" array to disk
 
-Call cs_scaffold({ spec, category: "routing" })
-Write all returned files to disk.
+Call in this order:
+  cs_scaffold({ spec, category: "infrastructure" })
+  cs_scaffold({ spec, category: "routing" })
+  cs_scaffold({ spec, category: "locations" })
 
-Call cs_scaffold({ spec, category: "locations" })
-Write all returned files to disk.
+## Step 7 — Venus Resolution
+For each location component generated in Step 6:
+  1. Identify the UI elements the app needs (inputs, buttons, tables, selects, loading states, etc.)
+  2. Call cs_venus_resolve({ ui_elements: [...list of needed elements...] })
+  3. Review the returned resolutions — each contains the exact Venus component, props, and example JSX
+  4. Update the location component to use the resolved Venus components
+  5. Use the combined_import from the response (includes @ts-ignore)
+  6. If any element has no Venus equivalent (venus_component: null), keep existing implementation
 
-## Step 7 — Setup
-Run: npm install && npm run dev
+## Step 8 — Verify
+Call cs_verify({ project_path }) to audit the generated project.
+If "passed" is false:
+  - Read each item in "fix_instructions"
+  - Apply the fix
+  - Call cs_verify({ project_path }) again to confirm
+Repeat until all checks pass.
+Do NOT proceed to Step 9 until cs_verify returns passed: true.
+
+## Step 9 — Build and Run
+Run: npm install && npm run build
+If build fails: fix TypeScript errors and rebuild until it succeeds.
+Only after successful build: npm run dev
 Confirm the app starts on localhost:3000.
 
 ## Venus Rule
@@ -87,6 +108,7 @@ For every component in the generated UI, consult cs://patterns first.
 Use Venus components for all standard UI elements.
 Add @ts-ignore above every Venus import.
 Never use raw <input>, <button>, <select>, <table> when a Venus equivalent exists.
+When unsure if a Venus component exists, call cs_venus_resolve to check.
 
 Begin with Step 1 now.`,
           },

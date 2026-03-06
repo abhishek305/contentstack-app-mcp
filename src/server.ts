@@ -39,7 +39,7 @@ for (const uri of listResourceUris()) {
   );
 }
 
-// --- Generation Tools (6 tools, always active) ---
+// --- Generation Tools (8 tools, always active) ---
 // Tool handlers return arbitrary objects; we wrap them in MCP content format here
 for (const tool of generationTools) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

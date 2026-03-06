@@ -33,6 +33,40 @@ const COMPONENT_MAP: Record<string, { folder: string; component: string; importP
   "cs.cm.organization.full_page": { folder: "GlobalFullPage", component: "GlobalFullPage", importPath: "../GlobalFullPage/GlobalFullPage" },
 };
 
+const VENUS_IMPORT = `// @ts-ignore — venus-components ships @types/react v17 causing JSX conflicts with React 18
+import { Button, TextInput, FieldLabel, SkeletonTile } from "@contentstack/venus-components";`;
+
+const VENUS_IMPORT_FULL_PAGE = `// @ts-ignore — venus-components ships @types/react v17 causing JSX conflicts with React 18
+import { Button, TextInput, SkeletonTile } from "@contentstack/venus-components";`;
+
+const VENUS_IMPORT_CONFIG = `// @ts-ignore — venus-components ships @types/react v17 causing JSX conflicts with React 18
+import { Button, TextInput, FieldLabel } from "@contentstack/venus-components";`;
+
+const VENUS_IMPORT_SIDEBAR = `// @ts-ignore — venus-components ships @types/react v17 causing JSX conflicts with React 18
+import { Button, SkeletonTile } from "@contentstack/venus-components";`;
+
+const VENUS_IMPORT_DASHBOARD = `// @ts-ignore — venus-components ships @types/react v17 causing JSX conflicts with React 18
+import { Button, SkeletonTile } from "@contentstack/venus-components";`;
+
+const VENUS_IMPORT_BASIC = `// @ts-ignore — venus-components ships @types/react v17 causing JSX conflicts with React 18
+import { Button } from "@contentstack/venus-components";`;
+
+function extractDirectories(files: Array<{ path: string }>): string[] {
+  const dirs = new Set<string>();
+  for (const f of files) {
+    const lastSlash = f.path.lastIndexOf("/");
+    if (lastSlash > 0) {
+      const dir = f.path.substring(0, lastSlash);
+      dirs.add(dir);
+      const parts = dir.split("/");
+      for (let i = 1; i < parts.length; i++) {
+        dirs.add(parts.slice(0, i + 1).join("/"));
+      }
+    }
+  }
+  return [...dirs].sort();
+}
+
 function generateInfrastructure(spec: Record<string, unknown>): Array<{ path: string; content: string }> {
   const appName = (spec.app_name as string) || "My App";
   const hasVenus =
@@ -355,9 +389,11 @@ function generateLocationComponent(
   const apiImport = hasProxy ? '\nimport { useApi } from "../../common/hooks/useApi";' : "";
 
   let componentBody = "";
+  let venusImport = VENUS_IMPORT_BASIC;
 
   switch (locType) {
     case "cs.cm.stack.custom_field":
+      venusImport = VENUS_IMPORT;
       componentBody = `const sdk = appSdk as any;
   const field = sdk.location?.CustomField?.field;
   const [value, setValue] = useState<string>(field?.getData() ?? "");
@@ -369,17 +405,21 @@ function generateLocationComponent(
 
   return (
     <div style={{ padding: "16px" }}>
-      <input
+      <FieldLabel htmlFor="custom-field-input">Value</FieldLabel>
+      <TextInput
         type="text"
         value={value}
-        onChange={(e) => handleChange(e.target.value)}
-        style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
+        onChange={(e: any) => handleChange(e.target.value)}
+        placeholder="Enter value"
+        width="full"
+        version="v2"
       />
     </div>
   );`;
       break;
 
     case "cs.cm.stack.sidebar":
+      venusImport = VENUS_IMPORT_SIDEBAR;
       componentBody = `const sdk = appSdk as any;
   const sidebar = sdk.location?.SidebarWidget;
   const [entryData, setEntryData] = useState<any>(null);
@@ -391,27 +431,41 @@ function generateLocationComponent(
     sidebar?.entry?.onChange((updated: any) => setEntryData(updated));
   }, [sidebar]);
 
+  if (!entryData) {
+    return (
+      <div style={{ padding: "16px" }}>
+        <SkeletonTile numberOfTiles={3} tileHeight={20} tileWidth={200} tileBottomSpace={12} />
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: "16px" }}>
       <h3 style={{ marginBottom: "12px" }}>${loc.label || "Sidebar Widget"}</h3>
-      {entryData ? (
-        <pre style={{ fontSize: "12px", overflow: "auto" }}>
-          {JSON.stringify(entryData, null, 2)}
-        </pre>
-      ) : (
-        <p>Loading entry data...</p>
-      )}
+      <pre style={{ fontSize: "12px", overflow: "auto" }}>
+        {JSON.stringify(entryData, null, 2)}
+      </pre>
     </div>
   );`;
       break;
 
     case "cs.cm.stack.dashboard":
+      venusImport = VENUS_IMPORT_DASHBOARD;
       componentBody = `const sdk = appSdk as any;
-  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     sdk.location?.DashboardWidget?.frame?.updateHeight(400);
+    setLoading(false);
   }, [sdk]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: "16px" }}>
+        <SkeletonTile numberOfTiles={4} tileHeight={24} tileWidth={300} tileBottomSpace={12} />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "16px" }}>
@@ -422,9 +476,11 @@ function generateLocationComponent(
       break;
 
     case "cs.cm.stack.config":
+      venusImport = VENUS_IMPORT_CONFIG;
       componentBody = `const sdk = appSdk as any;
   const installation = sdk.location?.AppConfigWidget?.installation;
   const [config, setConfig] = useState<any>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     installation?.getInstallationData().then((data: any) => {
@@ -439,15 +495,17 @@ function generateLocationComponent(
   };
 
   return (
-    <div style={{ padding: "16px" }}>
+    <div style={{ padding: "16px", maxWidth: "600px" }}>
       <h3 style={{ marginBottom: "16px" }}>App Configuration</h3>
-      <div style={{ marginBottom: "12px" }}>
-        <label style={{ display: "block", marginBottom: "4px" }}>Setting</label>
-        <input
+      <div style={{ marginBottom: "16px" }}>
+        <FieldLabel htmlFor="config-setting">Setting</FieldLabel>
+        <TextInput
           type="text"
           value={config.setting || ""}
-          onChange={(e) => updateConfig("setting", e.target.value)}
-          style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
+          onChange={(e: any) => updateConfig("setting", e.target.value)}
+          placeholder="Enter configuration value"
+          width="full"
+          version="v2"
         />
       </div>
     </div>
@@ -455,6 +513,7 @@ function generateLocationComponent(
       break;
 
     case "cs.cm.stack.full_page":
+      venusImport = VENUS_IMPORT_FULL_PAGE;
       componentBody = `const sdk = appSdk as any;
   const [loading, setLoading] = useState(true);
   ${hasProxy ? "const { callProxyApi } = useApi();" : ""}
@@ -464,28 +523,38 @@ function generateLocationComponent(
   }, []);
 
   if (loading) {
-    return <div style={{ padding: "24px" }}><p>Loading...</p></div>;
+    return (
+      <div style={{ padding: "24px" }}>
+        <SkeletonTile numberOfTiles={5} tileHeight={28} tileWidth={400} tileBottomSpace={16} />
+      </div>
+    );
   }
 
   return (
     <div style={{ padding: "24px" }}>
-      <h2 style={{ marginBottom: "16px" }}>${loc.label || "Full Page App"}</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+        <h2>${loc.label || "Full Page App"}</h2>
+        <Button buttonType="secondary" onClick={() => {}}>Refresh</Button>
+      </div>
       <p>Implement your full page application logic here.</p>
     </div>
   );`;
       break;
 
     default:
+      venusImport = VENUS_IMPORT_BASIC;
       componentBody = `return (
     <div style={{ padding: "16px" }}>
       <h3>${loc.label || info.component}</h3>
       <p>Implement your ${locType} logic here.</p>
+      <Button buttonType="primary" onClick={() => {}}>Action</Button>
     </div>
   );`;
   }
 
   const content = `import React, { useState, useEffect } from "react";
 import { useAppSdk } from "../../common/hooks/useAppSdk";${apiImport}
+${venusImport}
 
 const ${info.component} = () => {
   const appSdk = useAppSdk();
@@ -501,7 +570,7 @@ export default ${info.component};
 export const scaffoldTool = {
   name: "cs_scaffold",
   description:
-    "Generates source files by category. Call 3 times: infrastructure → routing → locations. Read cs://patterns before calling.\nInput: { spec: object, category: 'infrastructure'|'routing'|'locations' }\nOutput: { category, files: [{ path, content }] }",
+    "Generates source files by category with directory structure. Call 3 times: infrastructure → routing → locations. Read cs://patterns before calling.\nInput: { spec: object, category: 'infrastructure'|'routing'|'locations' }\nOutput: { category, directories: string[], files: [{ path, content }] }\nAgent MUST create all directories first, then write files.",
   schema: scaffoldSchema,
   handler: async (input: z.infer<typeof scaffoldSchema>) => {
     try {
@@ -532,11 +601,14 @@ export const scaffoldTool = {
         }
       }
 
+      const directories = extractDirectories(files);
+
       return {
         success: true,
         category: input.category,
+        directories,
         files,
-        note: `Write all ${files.length} files to disk. Then call cs_scaffold with the next category.`,
+        note: `First create all ${directories.length} directories (mkdir -p), then write all ${files.length} files to disk. Then call cs_scaffold with the next category.`,
       };
     } catch (e) {
       return {

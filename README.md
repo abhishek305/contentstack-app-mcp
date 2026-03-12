@@ -19,13 +19,44 @@ This MCP server eliminates all of that by providing deterministic tools, structu
 
 ## Quick Start
 
-### Option A: npx (recommended)
+### Option A: Hosted URL (easiest — no install)
+
+A hosted version of the MCP server is available. Add one line to your IDE config and you're done — no Node.js, no cloning, no build step.
+
+**Cursor** — add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "contentstack-apps": {
+      "url": "https://contentstack-app-mcp-remote.vercel.app/api/mcp"
+    }
+  }
+}
+```
+
+**Claude Desktop** — add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "contentstack-apps": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://contentstack-app-mcp-remote.vercel.app/api/mcp"]
+    }
+  }
+}
+```
+
+> Replace the URL above with your org's hosted instance if available.
+
+### Option B: npx (local)
 
 ```bash
 npx contentstack-app-mcp
 ```
 
-### Option B: Clone and build
+### Option C: Clone and build (local)
 
 ```bash
 git clone https://github.com/abhishek305/contentstack-app-mcp.git
@@ -38,7 +69,19 @@ npm run build
 
 ### Cursor
 
-Add to `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` globally):
+**Remote (recommended)** — add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "contentstack-apps": {
+      "url": "https://contentstack-app-mcp-remote.vercel.app/api/mcp"
+    }
+  }
+}
+```
+
+**Local (npx)** — add to `.cursor/mcp.json`:
 
 ```json
 {
@@ -51,7 +94,7 @@ Add to `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` globally):
 }
 ```
 
-Or if you cloned the repo:
+**Local (cloned repo)** — add to `.cursor/mcp.json`:
 
 ```json
 {
@@ -73,7 +116,20 @@ cp contentstack-app-mcp/.cursor/rules/contentstack-mcp-workflow.mdc \
 
 ### Claude Desktop
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+**Remote** — add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "contentstack-apps": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://contentstack-app-mcp-remote.vercel.app/api/mcp"]
+    }
+  }
+}
+```
+
+**Local** — same file:
 
 ```json
 {
@@ -88,7 +144,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 
 ### Claude Code
 
-The MCP config is the same as Claude Desktop. Additionally, copy the `CLAUDE.md` file from this repo into your project root for auto-triggering:
+Configure the MCP server using either the remote URL or local approach above. Additionally, copy `CLAUDE.md` into your project root for auto-triggering:
 
 ```bash
 cp contentstack-app-mcp/CLAUDE.md your-project/CLAUDE.md
@@ -104,21 +160,9 @@ cp contentstack-app-mcp/AGENTS.md your-project/AGENTS.md
 
 This is a cross-tool standard that most AI coding assistants recognize.
 
-### Remote (Vercel)
+### Self-Hosting (Vercel / Contentstack Launch)
 
-If the server is deployed remotely, use the URL-based config:
-
-```json
-{
-  "mcpServers": {
-    "contentstack-apps": {
-      "url": "https://your-deployment.vercel.app/api/mcp"
-    }
-  }
-}
-```
-
-See [GUIDE.md](GUIDE.md) for Vercel deployment instructions.
+You can deploy your own hosted instance using the [remote wrapper project](https://github.com/abhishek305/contentstack-app-mcp-remote). See [GUIDE.md](GUIDE.md) for deployment instructions.
 
 ## What's Inside
 
@@ -194,7 +238,7 @@ With these in place, prompts like "build a custom field", "migrate my app", or "
 - **Phase 2 API tools** (create/update/install apps in Developer Hub) are coded but not yet active
 - **Knowledge files are static** — update and rebuild when SDK or Venus changes
 - **Venus story files** require `@contentstack/venus-components` in workspace or `node_modules` for `cs_venus_resolve` to read Storybook examples
-- **No auth on remote** — if you deploy to Vercel, secure it yourself
+- **No auth on remote** — if you self-host to Vercel or Launch, secure it yourself
 
 ## Contributing
 

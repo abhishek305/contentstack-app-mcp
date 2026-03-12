@@ -11,7 +11,7 @@ A complete guide to setting up and using the Contentstack App Development MCP Se
 3. [Connecting to Your IDE](#connecting-to-your-ide)
 4. [Your First App](#your-first-app)
 5. [Migrating an Existing App](#migrating-an-existing-app)
-6. [Deploy to Vercel (Remote)](#deploy-to-vercel-remote)
+6. [Remote Deployment (Hosted URL)](#remote-deployment-hosted-url)
 7. [Tools Reference](#tools-reference)
 8. [Resources Reference](#resources-reference)
 9. [Prompts Reference](#prompts-reference)
@@ -23,7 +23,7 @@ A complete guide to setting up and using the Contentstack App Development MCP Se
 
 ## Prerequisites
 
-- **Node.js 18+** — [download](https://nodejs.org)
+- **Node.js 18+** — [download](https://nodejs.org) (not required if using the hosted URL)
 - **An MCP-compatible IDE** — any of the following:
   - [Cursor](https://cursor.com)
   - [Claude Desktop](https://claude.ai/download)
@@ -37,11 +37,15 @@ A complete guide to setting up and using the Contentstack App Development MCP Se
 
 ## Installation
 
-### Option A: npx (no install)
+### Option A: Hosted URL (easiest — no install)
+
+A hosted version of the MCP server is available. No Node.js, no cloning, no build step — just paste a URL into your IDE config. See [Connecting to Your IDE](#connecting-to-your-ide) for the exact config.
+
+### Option B: npx (local, no install)
 
 The server is available as an npm package. Your MCP host will start it automatically — no manual installation needed. Just configure your IDE (see next section).
 
-### Option B: Clone and build
+### Option C: Clone and build (local)
 
 ```bash
 git clone https://github.com/abhishek305/contentstack-app-mcp.git
@@ -59,7 +63,21 @@ The compiled server is at `dist/server.js`.
 ### Cursor
 
 1. Open your project in Cursor
-2. Create `.cursor/mcp.json` in your project root (or edit `~/.cursor/mcp.json` for global):
+2. Create `.cursor/mcp.json` in your project root (or edit `~/.cursor/mcp.json` for global)
+
+**Remote (recommended — no Node.js needed):**
+
+```json
+{
+  "mcpServers": {
+    "contentstack-apps": {
+      "url": "https://contentstack-app-mcp-remote.vercel.app/api/mcp"
+    }
+  }
+}
+```
+
+**Local (npx):**
 
 ```json
 {
@@ -72,7 +90,7 @@ The compiled server is at `dist/server.js`.
 }
 ```
 
-If you cloned the repo instead:
+**Local (cloned repo):**
 
 ```json
 {
@@ -85,7 +103,7 @@ If you cloned the repo instead:
 }
 ```
 
-3. Copy the auto-trigger rule into your project:
+3. (Optional) Copy the auto-trigger rule into your project for stronger workflow enforcement:
 
 ```bash
 mkdir -p your-project/.cursor/rules
@@ -100,11 +118,27 @@ cp contentstack-app-mcp/.cursor/rules/contentstack-mcp-workflow.mdc \
 
 1. Open Claude Desktop
 2. Go to Settings > Developer > Edit Config
-3. Add to `claude_desktop_config.json`:
 
 **macOS** — file is at `~/Library/Application Support/Claude/claude_desktop_config.json`
 
 **Windows** — file is at `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Remote (recommended):**
+
+```json
+{
+  "mcpServers": {
+    "contentstack-apps": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://contentstack-app-mcp-remote.vercel.app/api/mcp"]
+    }
+  }
+}
+```
+
+> `mcp-remote` bridges Streamable HTTP to stdio for Claude Desktop.
+
+**Local:**
 
 ```json
 {
@@ -117,12 +151,11 @@ cp contentstack-app-mcp/.cursor/rules/contentstack-mcp-workflow.mdc \
 }
 ```
 
-4. Fully restart Claude Desktop (quit and reopen)
+3. Fully restart Claude Desktop (quit and reopen)
 
 ### Claude Code
 
-1. Configure the MCP server the same way as Claude Desktop
-2. Copy `CLAUDE.md` into your project root for auto-triggering:
+Configure the MCP server using any of the approaches above (remote URL or local). Additionally, copy `CLAUDE.md` into your project root for auto-triggering:
 
 ```bash
 cp contentstack-app-mcp/CLAUDE.md your-project/CLAUDE.md
@@ -130,7 +163,7 @@ cp contentstack-app-mcp/CLAUDE.md your-project/CLAUDE.md
 
 ### Other IDEs (Codex CLI, Continue.dev, Aider, Windsurf)
 
-1. Configure the MCP server according to your IDE's documentation
+1. Configure the MCP server according to your IDE's documentation — use the remote URL or local approach
 2. Copy `AGENTS.md` into your project root:
 
 ```bash
@@ -190,62 +223,74 @@ You can also use more specific prompts:
 
 ---
 
-## Deploy to Vercel (Remote)
+## Remote Deployment (Hosted URL)
 
-The MCP server can be deployed remotely so your team doesn't need local Node.js. This uses the [mcp-handler](https://github.com/vercel/mcp-handler) package.
+The MCP server can be deployed remotely so your team doesn't need local Node.js. Anyone with the URL just adds one line to their IDE config.
 
-### Steps
+A ready-to-deploy wrapper project is available at [contentstack-app-mcp-remote](https://github.com/abhishek305/contentstack-app-mcp-remote). It's a minimal Next.js app with a single API route that serves the MCP server over HTTP.
 
-1. Create a new Next.js project:
+### Deploy to Contentstack Launch
 
-```bash
-npx create-next-app@latest contentstack-mcp-remote
-cd contentstack-mcp-remote
-```
+1. Go to **Contentstack** > **Launch** > **+ New Project** > **Import from GitHub**
+2. Select the `contentstack-app-mcp-remote` repo
+3. Configure:
 
-2. Install the dependencies:
+| Setting | Value |
+|---|---|
+| Framework | Next.js |
+| Build command | `npm install && npm run build` |
+| Output directory | `.next` |
+| Node.js version | 20 |
 
-```bash
-npm install mcp-handler contentstack-app-mcp
-```
+4. Click **Deploy**
 
-3. Create the API route at `app/api/[transport]/route.ts`:
+Your MCP endpoint will be at: `https://<your-launch-url>/api/mcp`
 
-```typescript
-import { createMcpHandler } from "mcp-handler";
-import { registerContentstackMcp } from "contentstack-app-mcp/dist/register.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
-const handler = createMcpHandler(
-  (server) => {
-    registerContentstackMcp(server as unknown as McpServer);
-  },
-  {},
-  { basePath: "/api" }
-);
-
-export { handler as GET, handler as POST, handler as DELETE };
-```
-
-4. Deploy:
+### Deploy to Vercel
 
 ```bash
-vercel deploy
+git clone https://github.com/abhishek305/contentstack-app-mcp-remote.git
+cd contentstack-app-mcp-remote
+npm install
+npx vercel deploy
 ```
 
-5. Configure your IDE to use the remote URL:
+Your MCP endpoint will be at: `https://<your-vercel-url>/api/mcp`
+
+### Use the hosted URL
+
+Once deployed, share this config with your team:
+
+**Cursor** (`.cursor/mcp.json`):
 
 ```json
 {
   "mcpServers": {
     "contentstack-apps": {
-      "url": "https://your-project.vercel.app/api/mcp"
+      "url": "https://<your-hosted-url>/api/mcp"
     }
   }
 }
 ```
 
-> **Note:** This deployment has no authentication. For production use, add OAuth using `mcp-handler`'s `withMcpAuth` — see the [Vercel docs](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel#enabling-authorization).
+**Claude Desktop** (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "contentstack-apps": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://<your-hosted-url>/api/mcp"]
+    }
+  }
+}
+```
+
+### How the remote wrapper works
+
+The wrapper project contains a single Next.js API route that imports `registerContentstackMcp` from this package and serves it via [mcp-handler](https://github.com/vercel/mcp-handler) over Streamable HTTP. Same tools, same knowledge, same workflow — just over HTTP instead of stdio.
+
+> **Note:** The default deployment has no authentication. For production, use `mcp-handler`'s `withMcpAuth` for OAuth, or Launch's password protection feature.
 
 ---
 
@@ -349,9 +394,9 @@ Generates an ordered migration plan from `cs_analyze` output. Returns instructio
 
 3. **Venus story file reading has requirements.** `cs_venus_resolve` can read Storybook `*.stories.tsx` files for detailed prop examples, but only if `@contentstack/venus-components` is installed in the workspace (`node_modules`) or available as a source directory.
 
-4. **stdio transport requires local Node.js.** The default setup runs the server as a local process. For teams without Node.js, deploy remotely (see [Deploy to Vercel](#deploy-to-vercel-remote)).
+4. **stdio transport requires local Node.js.** The default local setup runs the server as a process. For teams without Node.js, use the hosted URL or deploy your own instance (see [Remote Deployment](#remote-deployment-hosted-url)).
 
-5. **No authentication on remote deployments.** If you deploy to Vercel, you must add your own OAuth layer. The server does not include authentication out of the box.
+5. **No authentication on remote deployments.** If you deploy to Vercel or Launch, you must add your own auth layer. The server does not include authentication out of the box.
 
 6. **Tool descriptions guide LLM behavior.** The server is self-guiding through its tool descriptions and the `cs_workflow` prompt. Most LLMs follow them correctly, but rule files (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules/`) provide stronger enforcement.
 
@@ -366,7 +411,7 @@ A: VS Code does not natively support MCP. Use Cursor (VS Code fork with MCP supp
 A: Only if your client supports MCP. ChatGPT web does not support MCP. Codex CLI with GPT models does support MCP.
 
 **Q: Why stdio instead of HTTP?**
-A: stdio is the simplest, most portable MCP transport — no HTTP server, no port management, no auth needed. For remote access, deploy to Vercel as described above.
+A: stdio is the simplest, most portable MCP transport — no HTTP server, no port management, no auth needed. For remote access, use the hosted URL or deploy your own instance to Launch or Vercel (see [Remote Deployment](#remote-deployment-hosted-url)).
 
 **Q: Can I use this without an AI agent?**
 A: The MCP server is designed to be consumed by AI agents, not used directly. You can test it with the [MCP Inspector](https://github.com/modelcontextprotocol/inspector).

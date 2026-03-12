@@ -152,7 +152,7 @@ function scanFileForIssues(
 export const analyzeTool = {
   name: "cs_analyze",
   description:
-    "Audits an existing repo against Contentstack best practices. Read cs://maintenance for the checklist.\nInput: { repo_path: string }\nOutput: { structure_type, framework, sdk_version, venus_version, issues[], migration_needed }",
+    "Migration workflow step 1. Audits an existing Contentstack app repo against best practices. Call when user wants to audit, migrate, refactor, or fix an existing app. Read cs://maintenance for the checklist.\nInput: { repo_path: string }\nOutput: { structure_type, framework, sdk_version, venus_version, issues[], migration_needed }",
   schema: analyzeSchema,
   handler: async (input: z.infer<typeof analyzeSchema>) => {
     try {

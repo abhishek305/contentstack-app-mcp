@@ -2,3 +2,9 @@ node_modules/
 dist/
 *.js.map
 .vscode/
+docs/
+.env
+.env.*
+.DS_Store
+SLACK_ANNOUNCEMENT.md
+PUBLISHING.md

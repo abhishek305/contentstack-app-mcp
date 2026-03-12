@@ -47,7 +47,7 @@ Pass the same spec object to cs_manifest({ spec }) and cs_scaffold({ spec, categ
 export const planTool = {
   name: "cs_plan",
   description:
-    "Stateless confirmation gate — validates spec and returns a confirmation_prompt. LLM must read cs://locations and cs://security first, draft spec from user intent, then call this tool. Show confirmation_prompt to user, wait for approval, then call cs_manifest and cs_scaffold with the same spec.\nInput: { spec: object }\nOutput: { success, confirmation_prompt, security_tier, warnings }",
+    "Step 4 of the create workflow. Stateless confirmation gate — validates spec and returns a confirmation_prompt. Call after cs_preflight. Show confirmation_prompt to user and WAIT for approval before proceeding to cs_manifest.\nInput: { spec: object }\nOutput: { success, confirmation_prompt, security_tier, warnings }",
   schema: planSchema,
   handler: async (input: z.infer<typeof planSchema>) => {
     try {

@@ -148,7 +148,7 @@ export function runPreflight(spec: Record<string, unknown>): PreflightResult {
 export const preflightTool = {
   name: "cs_preflight",
   description:
-    "Validates a structured app spec and infers security tier + permissions. Read cs://spec-schema before calling.\nInput: { spec: object }\nOutput: { valid, errors, warnings, security_tier, inferred_permissions, needs_app_config }",
+    "Step 3 of the create workflow. Validates a structured app spec and infers security tier + permissions. Call after drafting spec, before cs_plan. Read cs://spec-schema before calling.\nInput: { spec: object }\nOutput: { valid, errors, warnings, security_tier, inferred_permissions, needs_app_config }",
   schema: preflightSchema,
   handler: async (input: z.infer<typeof preflightSchema>) => {
     try {

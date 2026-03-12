@@ -1,12 +1,36 @@
 {
   "name": "contentstack-app-mcp",
   "version": "1.0.0",
+  "description": "MCP server for building Contentstack Marketplace apps with AI agents",
   "type": "module",
   "main": "dist/server.js",
+  "bin": {
+    "contentstack-app-mcp": "./dist/server.js"
+  },
+  "files": [
+    "dist",
+    "knowledge"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts"
+  },
+  "keywords": [
+    "mcp",
+    "contentstack",
+    "marketplace",
+    "ai",
+    "model-context-protocol",
+    "venus-components"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishek305/contentstack-app-mcp"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.27.1",

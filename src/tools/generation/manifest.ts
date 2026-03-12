@@ -136,7 +136,7 @@ export function generateManifest(spec: Record<string, unknown>, baseUrl: string)
 export const manifestTool = {
   name: "cs_manifest",
   description:
-    "Generates manifest.json in Developer Hub format from a spec. Read cs://manifest for format reference.\nInput: { spec: object, base_url?: string }\nOutput: { manifest: object } — write as manifest.json",
+    "Step 5 of the create workflow. Generates manifest.json in Developer Hub format from a spec. Call after user approves cs_plan output. Read cs://manifest for format reference.\nInput: { spec: object, base_url?: string }\nOutput: { manifest: object } — write as manifest.json",
   schema: manifestSchema,
   handler: async (input: z.infer<typeof manifestSchema>) => {
     try {

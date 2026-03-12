@@ -1,6 +1,6 @@
 export const workflowPrompt = {
   name: "cs_workflow",
-  description: "Orchestrates the full app creation workflow. Guides through spec drafting → preflight → plan → manifest → scaffold → venus resolution → verify → build in the correct sequence.",
+  description: "START HERE. When the user asks to build, create, scaffold, migrate, refactor, audit, or fix any Contentstack app, sidebar widget, custom field, dashboard widget, or full page app — invoke this prompt first. Returns the complete step-by-step workflow.",
   arguments: [
     {
       name: "intent",

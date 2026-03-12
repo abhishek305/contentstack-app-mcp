@@ -169,7 +169,7 @@ function buildMigrationSteps(analysis: Record<string, unknown>): MigrationStep[]
 export const migrateTool = {
   name: "cs_migrate",
   description:
-    "Generates an ordered migration plan from cs_analyze output. Read cs://maintenance for migration order. Returns instructions only — does NOT modify files.\nInput: { analysis: object } (output of cs_analyze)\nOutput: { do_not_change: string[], steps: [...] }",
+    "Migration workflow step 2. Generates an ordered migration plan from cs_analyze output. Call with the output of cs_analyze. Returns instructions only — does NOT modify files.\nInput: { analysis: object } (output of cs_analyze)\nOutput: { do_not_change: string[], steps: [...] }",
   schema: migrateSchema,
   handler: async (input: z.infer<typeof migrateSchema>) => {
     try {

@@ -570,7 +570,7 @@ export default ${info.component};
 export const scaffoldTool = {
   name: "cs_scaffold",
   description:
-    "Generates source files by category with directory structure. Call 3 times: infrastructure → routing → locations. Read cs://patterns before calling.\nInput: { spec: object, category: 'infrastructure'|'routing'|'locations' }\nOutput: { category, directories: string[], files: [{ path, content }] }\nAgent MUST create all directories first, then write files.",
+    "Steps 6a-6c of the create workflow. Generates source files by category with directory structure. Call 3 times (infrastructure → routing → locations) after cs_manifest. Read cs://patterns before calling.\nInput: { spec: object, category: 'infrastructure'|'routing'|'locations' }\nOutput: { category, directories: string[], files: [{ path, content }] }\nAgent MUST create all directories first, then write files.",
   schema: scaffoldSchema,
   handler: async (input: z.infer<typeof scaffoldSchema>) => {
     try {

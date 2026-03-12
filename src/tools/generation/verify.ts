@@ -302,7 +302,7 @@ function checkNoHardcodedKeys(projectPath: string): CheckResult {
 export const verifyTool = {
   name: "cs_verify",
   description:
-    "Post-generation verification tool. Audits a scaffolded project for structural, Venus compliance, security, and consistency issues. Call AFTER writing all scaffold files and manifest.\nInput: { project_path: string }\nOutput: { passed: boolean, checks: CheckResult[], fix_instructions: string[] }\nIf passed is false, fix each issue in fix_instructions and call cs_verify again.",
+    "Step 8 of the create workflow. Post-generation verification. Audits the scaffolded project for structural, Venus compliance, security, and consistency issues. Call after writing all files. Repeat until passed=true.\nInput: { project_path: string }\nOutput: { passed: boolean, checks: CheckResult[], fix_instructions: string[] }\nIf passed is false, fix each issue in fix_instructions and call cs_verify again.",
   schema: verifySchema,
   handler: async (input: z.infer<typeof verifySchema>) => {
     try {

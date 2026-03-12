@@ -361,7 +361,7 @@ function tryReadStoryFile(componentStoryPath: string, projectPath?: string): str
 export const venusResolveTool = {
   name: "cs_venus_resolve",
   description:
-    "Resolves UI element names to exact Venus component names, props, imports, and usage examples. Call BEFORE writing or customizing any UI code.\nInput: { ui_elements: string[], project_path?: string }\nOutput: { resolutions: VenusResolution[], combined_import: string }",
+    "Step 7 of the create workflow. Resolves UI element names to exact Venus component names, props, imports, and usage examples. Call after cs_scaffold, before cs_verify.\nInput: { ui_elements: string[], project_path?: string }\nOutput: { resolutions: VenusResolution[], combined_import: string }",
   schema: venusResolveSchema,
   handler: async (input: z.infer<typeof venusResolveSchema>) => {
     try {

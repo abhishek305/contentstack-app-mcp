@@ -1,9 +1,3 @@
----
-description: Contentstack Marketplace App Development — MCP Workflow
-globs: ["**/*"]
-alwaysApply: true
----
-
 # Contentstack App Development
 
 When the user asks to:
@@ -21,7 +15,7 @@ When the user asks to:
 6. Call `cs_plan({ spec })` — get confirmation_prompt, show it to the user, WAIT for approval
 7. After approval: call `cs_manifest({ spec })` — generate manifest.json, write to disk
 8. For each scaffold category (infrastructure, routing, locations):
-   a. Call `cs_scaffold({ spec, category })` 
+   a. Call `cs_scaffold({ spec, category })`
    b. Create ALL directories from the returned `directories` array FIRST
    c. Then write ALL files from the returned `files` array
 9. Call `cs_venus_resolve({ ui_elements: [...] })` for the UI elements needed in the app

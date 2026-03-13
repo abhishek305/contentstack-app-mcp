@@ -155,19 +155,19 @@ cp contentstack-app-mcp/.cursor/rules/contentstack-mcp-workflow.mdc \
 
 ### Claude Code
 
-Configure the MCP server using any of the approaches above (remote URL or local). Additionally, copy `CLAUDE.md` into your project root for auto-triggering:
+Configure the MCP server using any of the approaches above (remote URL or local). Additionally, copy the `CLAUDE.md` template into your project root for auto-triggering:
 
 ```bash
-cp contentstack-app-mcp/CLAUDE.md your-project/CLAUDE.md
+cp contentstack-app-mcp/docs/templates/CLAUDE.md your-project/CLAUDE.md
 ```
 
 ### Other IDEs (Codex CLI, Continue.dev, Aider, Windsurf)
 
 1. Configure the MCP server according to your IDE's documentation — use the remote URL or local approach
-2. Copy `AGENTS.md` into your project root:
+2. Copy the `AGENTS.md` template into your project root:
 
 ```bash
-cp contentstack-app-mcp/AGENTS.md your-project/AGENTS.md
+cp contentstack-app-mcp/docs/templates/AGENTS.md your-project/AGENTS.md
 ```
 
 `AGENTS.md` is a cross-tool standard supported by most AI coding assistants.
@@ -398,7 +398,7 @@ Generates an ordered migration plan from `cs_analyze` output. Returns instructio
 
 5. **No authentication on remote deployments.** If you deploy to Vercel or Launch, you must add your own auth layer. The server does not include authentication out of the box.
 
-6. **Tool descriptions guide LLM behavior.** The server is self-guiding through its tool descriptions and the `cs_workflow` prompt. Most LLMs follow them correctly, but rule files (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules/`) provide stronger enforcement.
+6. **Tool descriptions guide LLM behavior.** The server is self-guiding through its tool descriptions and the `cs_workflow` prompt. Most LLMs follow them correctly, but rule files (`docs/templates/CLAUDE.md`, `docs/templates/AGENTS.md`, `.cursor/rules/`) — copied into user projects — provide stronger enforcement.
 
 ---
 
@@ -420,7 +420,7 @@ A: The MCP server is designed to be consumed by AI agents, not used directly. Yo
 A: Edit `knowledge/patterns.md` to add the component's props and example JSX, and optionally add it to the `VENUS_REGISTRY` in `src/tools/generation/venus-resolve.ts`. Then rebuild.
 
 **Q: What if the AI ignores the MCP tools?**
-A: Copy the appropriate rule file into your project (`.cursor/rules/contentstack-mcp-workflow.mdc` for Cursor, `CLAUDE.md` for Claude Code, `AGENTS.md` for others). These explicitly instruct the AI to use the MCP tools.
+A: Copy the appropriate template into your project root (`.cursor/rules/contentstack-mcp-workflow.mdc` for Cursor, `docs/templates/CLAUDE.md` for Claude Code, `docs/templates/AGENTS.md` for others). These explicitly instruct the AI to use the MCP tools.
 
 ---
 

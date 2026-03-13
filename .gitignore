@@ -2,7 +2,11 @@ node_modules/
 dist/
 *.js.map
 .vscode/
-docs/
+docs/PLAN_ORIGINAL.md
+docs/PLAN_SIMPLIFICATION.md
+docs/DOCS_DRAFT.md
+docs/CONFLUENCE.md
+docs/TRD.md
 .env
 .env.*
 .DS_Store

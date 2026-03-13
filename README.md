@@ -144,25 +144,25 @@ cp contentstack-app-mcp/.cursor/rules/contentstack-mcp-workflow.mdc \
 
 ### Claude Code
 
-Configure the MCP server using either the remote URL or local approach above. Additionally, copy `CLAUDE.md` into your project root for auto-triggering:
+Configure the MCP server using either the remote URL or local approach above. Additionally, copy the `CLAUDE.md` template into your project root for auto-triggering:
 
 ```bash
-cp contentstack-app-mcp/CLAUDE.md your-project/CLAUDE.md
+cp contentstack-app-mcp/docs/templates/CLAUDE.md your-project/CLAUDE.md
 ```
 
 ### Other IDEs (Codex CLI, Continue.dev, Aider, Windsurf)
 
-Copy `AGENTS.md` from this repo into your project root:
+Copy the `AGENTS.md` template from this repo into your project root:
 
 ```bash
-cp contentstack-app-mcp/AGENTS.md your-project/AGENTS.md
+cp contentstack-app-mcp/docs/templates/AGENTS.md your-project/AGENTS.md
 ```
 
 This is a cross-tool standard that most AI coding assistants recognize.
 
 ### Self-Hosting (Vercel / Contentstack Launch)
 
-You can deploy your own hosted instance using the [remote wrapper project](https://github.com/abhishek305/contentstack-app-mcp-remote). See [GUIDE.md](GUIDE.md) for deployment instructions.
+You can deploy your own hosted instance using the [remote wrapper project](https://github.com/abhishek305/contentstack-app-mcp-remote). See [docs/GUIDE.md](docs/GUIDE.md) for deployment instructions.
 
 ## What's Inside
 
@@ -228,8 +228,8 @@ For even stronger guidance, copy the appropriate rule file into your project:
 | Your IDE | Copy This File |
 |---|---|
 | Cursor | `.cursor/rules/contentstack-mcp-workflow.mdc` |
-| Claude Code | `CLAUDE.md` |
-| Codex CLI / Continue.dev / Aider | `AGENTS.md` |
+| Claude Code | `docs/templates/CLAUDE.md` → copy to your project root |
+| Codex CLI / Continue.dev / Aider | `docs/templates/AGENTS.md` → copy to your project root |
 
 With these in place, prompts like "build a custom field", "migrate my app", or "audit this extension" trigger the full MCP workflow automatically.
 

@@ -71,7 +71,7 @@ The compiled server is at `dist/server.js`.
 {
   "mcpServers": {
     "contentstack-apps": {
-      "url": "https://contentstack-app-mcp-remote.vercel.app/api/mcp"
+      "url": "https://contentstack-app-mcp-remote.contentstackapps.com/api/mcp"
     }
   }
 }
@@ -130,7 +130,7 @@ cp contentstack-app-mcp/.cursor/rules/contentstack-mcp-workflow.mdc \
   "mcpServers": {
     "contentstack-apps": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://contentstack-app-mcp-remote.vercel.app/api/mcp"]
+      "args": ["-y", "mcp-remote", "https://contentstack-app-mcp-remote.contentstackapps.com/api/mcp"]
     }
   }
 }

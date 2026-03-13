@@ -238,7 +238,6 @@ With these in place, prompts like "build a custom field", "migrate my app", or "
 - **Phase 2 API tools** (create/update/install apps in Developer Hub) are coded but not yet active
 - **Knowledge files are static** — update and rebuild when SDK or Venus changes
 - **Venus story files** require `@contentstack/venus-components` in workspace or `node_modules` for `cs_venus_resolve` to read Storybook examples
-- **No auth on remote** — if you self-host to Vercel or Launch, secure it yourself
 
 ## Contributing
 
